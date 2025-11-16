@@ -73,3 +73,25 @@ async def list_jobs(
     if not jobs:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return jobs
+
+
+@router.delete("/{job_id}", status_code=status.HTTP_200_OK)
+async def delete_job(user: user_dependency, db: db_dependency, job_id: str):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    # Find the job and check if it belongs to the user
+    job = db.query(Job).filter(Job.id == job_id, Job.user_id == user.get("id")).first()
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found or you don't have permission to delete it",
+        )
+
+    # Delete the job
+    db.delete(job)
+    db.commit()
+
+    return {"message": "Job deleted successfully", "job_id": str(job_id)}

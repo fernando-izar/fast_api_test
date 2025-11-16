@@ -3,7 +3,15 @@ from uuid import UUID
 
 from app.db.nosql import mongo_db
 
-collection = mongo_db["job_logs"]
+collection = mongo_db["payment"]
+
+
+async def payment(data: Dict[str, Any]) -> str:
+    result = await collection.insert_one(data)
+    return str(result.inserted_id)
+
+
+# async def analytics_payment(data: Dict[str, Any]) -> str:
 
 
 async def create_job_log(data: Dict[str, Any]) -> str:
